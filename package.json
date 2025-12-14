@@ -1,0 +1,49 @@
+{
+  "name": "hubspot-triage-automation",
+  "version": "1.0.0",
+  "description": "HubSpot support ticket triage automation with LLM-based classification",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "prisma generate && prisma migrate deploy && tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:dry-run": "prisma migrate deploy --dry-run",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:verify": "prisma validate && prisma format",
+    "db:seed:performance": "tsx src/db/seed-performance.ts",
+    "db:benchmark": "tsx src/db/benchmark.ts",
+    "db:performance-report": "tsx src/db/performance-report.ts",
+    "db:rollback": "tsx src/db/rollback.ts",
+    "db:rollback:to": "tsx src/db/rollback.ts"
+  },
+  "keywords": [
+    "hubspot",
+    "automation",
+    "llm",
+    "triage",
+    "support"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.21.1",
+    "fastify": "^4.28.1",
+    "pino": "^9.4.0",
+    "zod": "^3.23.8",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "prisma": "^5.21.1",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
