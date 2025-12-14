@@ -50,8 +50,25 @@ Include JSON repair logic - one retry on invalid output, then send "triage faile
 **Phase 1 (MVP)**: Webhook intake, hybrid inference, JSON validation, Discord notifications, idempotency
 **Phase 2**: RAG over support docs/APIsec docs (embeddings + vector store)
 
-## Key Design Decisions to Make
+## Key Design Decisions (Resolved)
 
-- Idempotency store: Redis vs SQLite vs Postgres on Railway
-- Tunnel solution for local Ollama: Cloudflare Tunnel / Tailscale Funnel / ngrok
-- Whether to implement a local bridge service or expose Ollama directly
+- **Idempotency store**: PostgreSQL on Railway (zero additional cost, ACID guarantees)
+- **Tunnel solution**: Cloudflare Tunnel (free, stable URLs, built-in auth)
+- **Web framework**: Fastify (2x faster than Express, native TypeScript)
+- **Local bridge**: No - Cloudflare handles auth at edge
+- **JSON validation**: Zod (TypeScript-first, excellent error messages)
+- **LLM models**: llama3.2 (local) / llama-3.1-70b (Groq fallback)
+
+See `/docs/architecture/technical-decisions.md` for full ADRs.
+
+## Agent Workflow Requirements
+
+**IMPORTANT: All agents working on this codebase MUST read and follow `AGENTS.md` before starting work.**
+
+Key requirements:
+- Create feature branches (never commit to `main`)
+- Make atomic commits with clear messages
+- Get code-reviewer agent approval before creating PRs
+- Follow the PR template and process
+
+See `AGENTS.md` for complete instructions.
