@@ -11,7 +11,6 @@
  */
 
 import { prisma } from './client';
-import { Prisma } from '@prisma/client';
 
 /**
  * Result of an idempotency check
