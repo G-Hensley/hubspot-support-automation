@@ -22,9 +22,8 @@ Created Prisma schema with:
 
 **Key Features**:
 - UUID primary key for global uniqueness
-- Unique constraint on `ticketId` for idempotency enforcement
-- Three indexes for query optimization:
-  - `idx_ticket_id`: Fast idempotency checks (< 10ms)
+- Unique constraint on `ticketId` for idempotency enforcement (creates an implicit index)
+- Two explicit indexes for query optimization:
   - `idx_processed_at`: Efficient cleanup queries
   - `idx_provider`: Analytics by provider
 - Timestamps with timezone support

@@ -27,7 +27,7 @@ export interface IdempotencyCheckResult {
  * @param ticketId - HubSpot ticket ID
  * @returns Promise resolving to check result
  *
- * Performance: Expected < 50ms with proper indexing
+ * Performance: Expected < 10ms with proper indexing
  * Fail-open: Returns false on database errors to prevent lost tickets
  */
 export async function isTicketProcessed(

@@ -17,8 +17,7 @@ This document tracks all database schema changes and migrations for the HubSpot 
 - `processed_tickets`: Stores HubSpot ticket IDs that have been processed
 
 **Indexes Created**:
-- `processed_tickets_ticket_id_key`: Unique constraint on ticket_id
-- `idx_ticket_id`: B-tree index on ticket_id for fast lookups
+- `processed_tickets_ticket_id_key`: Unique constraint on ticket_id (creates implicit index for fast lookups)
 - `idx_processed_at`: B-tree index on processed_at for cleanup queries
 - `idx_provider`: B-tree index on provider for analytics
 
@@ -44,9 +43,8 @@ CREATE TABLE "processed_tickets" (
 ```sql
 DROP INDEX IF EXISTS "idx_provider";
 DROP INDEX IF EXISTS "idx_processed_at";
-DROP INDEX IF EXISTS "idx_ticket_id";
-DROP INDEX IF EXISTS "processed_tickets_ticket_id_key";
 DROP TABLE IF EXISTS "processed_tickets";
+-- Note: processed_tickets_ticket_id_key is dropped automatically when table is dropped
 ```
 
 **Testing Checklist**:
