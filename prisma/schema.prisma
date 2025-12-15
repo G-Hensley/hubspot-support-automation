@@ -14,26 +14,25 @@ datasource db {
 // to prevent duplicate triage notifications when HubSpot retries webhooks
 model ProcessedTicket {
   // Primary key: HubSpot ticket ID
-  id          String   @id @default(uuid()) @db.Uuid
-  ticketId    String   @unique @map("ticket_id") @db.VarChar(255)
+  id       String @id @default(uuid()) @db.Uuid
+  ticketId String @unique @map("ticket_id") @db.VarChar(255)
 
   // Timestamp when this ticket was processed
   processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
 
   // Which LLM provider was used: "local" or "groq"
-  provider    String   @map("provider") @db.VarChar(50)
+  provider String @map("provider") @db.VarChar(50)
 
   // Whether the triage succeeded or failed
-  success     Boolean  @default(true) @map("success")
+  success Boolean @default(true) @map("success")
 
   // Standard timestamps
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   // Indexes for efficient lookups
-  @@index([ticketId], name: "idx_ticket_id")
+  // Note: ticketId already has an index via @unique constraint
   @@index([processedAt], name: "idx_processed_at")
   @@index([provider], name: "idx_provider")
-
   @@map("processed_tickets")
 }

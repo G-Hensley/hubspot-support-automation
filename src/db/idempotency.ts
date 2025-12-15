@@ -51,9 +51,10 @@ export async function isTicketProcessed(
       provider: record.provider,
       processedAt: record.processedAt,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     // Fail-open: Log error and allow processing to prevent lost tickets
-    console.error('Idempotency check failed:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Idempotency check failed:', message);
     return { isProcessed: false };
   }
 }
@@ -75,6 +76,9 @@ export async function markTicketProcessed(
   success: boolean = true
 ): Promise<void> {
   try {
+    // Intentionally update processedAt on conflict to track the most recent processing attempt.
+    // This helps distinguish between the original processing time and retry attempts,
+    // which is useful for debugging webhook retry behavior and duplicate detection.
     await prisma.processedTicket.upsert({
       where: { ticketId },
       create: {
@@ -89,10 +93,11 @@ export async function markTicketProcessed(
         processedAt: new Date(),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Log but don't throw - failing to store idempotency record
     // is not fatal, just risks duplicate processing
-    console.error('Failed to mark ticket as processed:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Failed to mark ticket as processed:', message);
   }
 }
 
@@ -123,8 +128,9 @@ export async function cleanupOldRecords(
     });
 
     return result.count;
-  } catch (error) {
-    console.error('Failed to cleanup old records:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Failed to cleanup old records:', message);
     return 0;
   }
 }
@@ -161,8 +167,9 @@ export async function getProcessingStats(): Promise<{
       })),
       successRate: total > 0 ? successCount / total : 0,
     };
-  } catch (error) {
-    console.error('Failed to get processing stats:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Failed to get processing stats:', message);
     return {
       total: 0,
       byProvider: [],
@@ -183,8 +190,9 @@ export async function checkIdempotencyHealth(): Promise<boolean> {
   try {
     await prisma.$queryRaw`SELECT 1`;
     return true;
-  } catch (error) {
-    console.error('Idempotency health check failed:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Idempotency health check failed:', message);
     return false;
   }
 }

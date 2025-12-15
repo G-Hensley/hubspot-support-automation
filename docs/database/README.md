@@ -20,18 +20,33 @@ The primary purpose of the database is to serve as an **idempotency store**:
 
 ```prisma
 model ProcessedTicket {
+  // Primary key: UUID for unique identification
   id          String   @id @default(uuid()) @db.Uuid
+
+  // HubSpot ticket ID - unique constraint creates implicit index
   ticketId    String   @unique @map("ticket_id") @db.VarChar(255)
+
+  // Timestamp when this ticket was processed
   processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  // Which LLM provider was used: "local" or "groq"
   provider    String   @map("provider") @db.VarChar(50)
+
+  // Whether the triage succeeded or failed
   success     Boolean  @default(true) @map("success")
+
+  // Standard timestamps
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([processedAt], name: "idx_processed_at")
+  @@index([provider], name: "idx_provider")
+  @@map("processed_tickets")
 }
 ```
 
 **Indexes**:
-- `idx_ticket_id`: Fast lookups for idempotency checks
+- `ticketId @unique`: Implicit unique index for fast idempotency checks
 - `idx_processed_at`: Efficient cleanup of old records
 - `idx_provider`: Analytics queries by provider
 

@@ -25,9 +25,6 @@ CREATE TABLE "processed_tickets" (
 -- This ensures we can't accidentally process the same ticket twice
 CREATE UNIQUE INDEX "processed_tickets_ticket_id_key" ON "processed_tickets"("ticket_id");
 
--- CreateIndex: Index on ticket_id for fast lookups
-CREATE INDEX "idx_ticket_id" ON "processed_tickets"("ticket_id");
-
 -- CreateIndex: Index on processed_at for cleanup queries
 -- Used by cleanupOldRecords() function to delete records older than retention period
 CREATE INDEX "idx_processed_at" ON "processed_tickets"("processed_at");
@@ -38,15 +35,17 @@ CREATE INDEX "idx_provider" ON "processed_tickets"("provider");
 
 -- Performance Expectations:
 -- - INSERT: < 50ms (single row)
--- - SELECT by ticket_id: < 10ms (indexed unique lookup)
+-- - SELECT by ticket_id: < 10ms (indexed unique lookup via unique constraint)
 -- - DELETE old records: < 200ms (for ~1000 records)
+
+-- Note: ticketId has an implicit index via the UNIQUE constraint above
+-- No separate index needed for ticket_id lookups
 
 -- DOWN Migration (Rollback)
 -- Uncomment below and run manually to rollback this migration
 /*
 DROP INDEX IF EXISTS "idx_provider";
 DROP INDEX IF EXISTS "idx_processed_at";
-DROP INDEX IF EXISTS "idx_ticket_id";
 DROP INDEX IF EXISTS "processed_tickets_ticket_id_key";
 DROP TABLE IF EXISTS "processed_tickets";
 */

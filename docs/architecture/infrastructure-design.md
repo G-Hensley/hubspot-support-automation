@@ -174,16 +174,25 @@ cmd = "npm run start"
 ```sql
 -- CreateTable
 CREATE TABLE "processed_tickets" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "ticket_id" VARCHAR(255) NOT NULL,
     "processed_at" TIMESTAMP(3) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "provider" VARCHAR(50) NOT NULL,
+    "success" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "processed_tickets_pkey" PRIMARY KEY ("ticket_id")
+    CONSTRAINT "processed_tickets_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "processed_tickets_ticket_id_key" ON "processed_tickets"("ticket_id");
+
+-- CreateIndex
 CREATE INDEX "idx_processed_at" ON "processed_tickets"("processed_at");
+
+-- CreateIndex
+CREATE INDEX "idx_provider" ON "processed_tickets"("provider");
 ```
 
 ### Prisma Schema
@@ -200,12 +209,27 @@ datasource db {
 }
 
 model ProcessedTicket {
-  ticketId    String   @id @map("ticket_id") @db.VarChar(255)
-  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz
-  provider    String   @map("provider") @db.VarChar(50)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  // Primary key: UUID for unique identification
+  id          String   @id @default(uuid()) @db.Uuid
 
-  @@index([processedAt])
+  // HubSpot ticket ID - unique constraint creates implicit index
+  ticketId    String   @unique @map("ticket_id") @db.VarChar(255)
+
+  // Timestamp when this ticket was processed
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  // Which LLM provider was used: "local" or "groq"
+  provider    String   @map("provider") @db.VarChar(50)
+
+  // Whether the triage succeeded or failed
+  success     Boolean  @default(true) @map("success")
+
+  // Standard timestamps
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([processedAt], name: "idx_processed_at")
+  @@index([provider], name: "idx_provider")
   @@map("processed_tickets")
 }
 ```
