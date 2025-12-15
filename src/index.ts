@@ -17,7 +17,7 @@ async function main() {
       console.log('Database connection established');
     } catch (dbError) {
       console.warn('Database connection failed:', dbError instanceof Error ? dbError.message : dbError);
-      console.warn('Continuing server startup in degraded mode');
+      console.warn('Continuing server startup without database - health endpoint will report degraded status');
     }
 
     // Create and configure Fastify server

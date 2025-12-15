@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { config } from './config/index';
 import { registerRoutes } from './routes/index';
+import { disconnectDatabase } from './db/index';
 
 /**
  * Create and configure Fastify server instance
@@ -115,6 +116,8 @@ export async function createServer() {
     } catch (shutdownError) {
       fastify.log.error({ error: shutdownError }, 'Error during shutdown after uncaught exception');
     }
+    // Ensure database connections are closed
+    await disconnectDatabase();
     process.exit(1);
   });
 
@@ -126,6 +129,8 @@ export async function createServer() {
     } catch (shutdownError) {
       fastify.log.error({ error: shutdownError }, 'Error during shutdown after unhandled rejection');
     }
+    // Ensure database connections are closed
+    await disconnectDatabase();
     process.exit(1);
   });
 

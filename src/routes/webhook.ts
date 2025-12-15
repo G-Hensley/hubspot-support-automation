@@ -25,19 +25,19 @@ export async function webhookRoutes(fastify: FastifyInstance) {
       const parseResult = hubspotWebhookPayloadSchema.safeParse(request.body);
       if (!parseResult.success) {
         return reply.code(400).send({
-          status: 'error',
+          error: 'validation_error',
           message: 'Invalid request body',
-          errors: parseResult.error.errors,
+          details: parseResult.error.errors,
+          request_id: request.id,
         });
       }
       const body = parseResult.data;
 
-      // Extract ticket ID
-      // HubSpot webhooks may not always include hs_ticket_id in the properties object,
-      // especially for certain event types or if the ticket was just created and not fully populated.
-      // In such cases, objectId (the top-level unique identifier for the object in HubSpot) is used as a fallback.
-      // This ensures we always have a ticket identifier, but future maintainers should verify
-      // that objectId is always equivalent to the ticket's ID in all relevant webhook scenarios.
+      /**
+       * Extract ticket ID.
+       * Falls back to objectId if hs_ticket_id is missing (e.g., for certain event types or just-created tickets).
+       * Note: Verify objectId equivalence for all webhook scenarios before production use.
+       */
       const ticketId = body.properties.hs_ticket_id || String(body.objectId);
 
       request.log.info(

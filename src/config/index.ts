@@ -26,6 +26,8 @@ const envSchema = z.object({
   // Authentication for LOCAL_LLM_URL:
   // - Use LOCAL_LLM_TOKEN for simple token-based authentication (e.g., if your local LLM endpoint expects an Authorization header).
   // - Use CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET if your local LLM endpoint is protected by Cloudflare Access.
+  // - All authentication fields are optional. If none are provided, requests to LOCAL_LLM_URL will be unauthenticated.
+  //   This is suitable for local development or tunnels with built-in authentication.
   LOCAL_LLM_TOKEN: z.string().optional(),
   CF_ACCESS_CLIENT_ID: z.string().optional(),
   CF_ACCESS_CLIENT_SECRET: z.string().optional(),

@@ -28,12 +28,10 @@ export async function validateWebhookToken(
     return;
   }
 
-  const token = tokenHeader;
-
   // Validate token against configured secret using constant-time comparison
   // This prevents timing attacks where attackers could discover the token
   // by measuring response times
-  const tokenBuffer = Buffer.from(token);
+  const tokenBuffer = Buffer.from(tokenHeader);
   const secretBuffer = Buffer.from(config.HUBSPOT_WEBHOOK_TOKEN);
 
   // Check length first (not constant-time, but necessary for timingSafeEqual)

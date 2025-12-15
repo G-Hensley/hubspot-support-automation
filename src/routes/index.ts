@@ -12,5 +12,6 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Register webhook routes
   await fastify.register(webhookRoutes);
 
-  fastify.log.info('All routes registered');
+  // Note: Fastify's built-in logger already logs registered routes at debug level
+  // Additional route registration logging can be viewed by setting LOG_LEVEL=debug
 }

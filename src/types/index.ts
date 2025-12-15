@@ -135,22 +135,24 @@ export const triageOutputSchema = z.object({
   questions_for_customer: z.array(z.string()).default([]),
   internal_notes: z.array(z.string()).default([]),
   confidence: z.number().min(0).max(1),
-}).refine(
-  (data) => {
-    // If reply_needed is true, reply_draft should not be null
-    if (data.reply_needed && data.reply_draft === null) {
-      return false;
-    }
-    // If reply_needed is false, reply_draft should be null
-    if (!data.reply_needed && data.reply_draft !== null) {
-      return false;
-    }
-    return true;
-  },
-  {
-    message: 'reply_draft must be provided when reply_needed is true, and null when false'
+}).superRefine((data, ctx) => {
+  // If reply_needed is true, reply_draft should not be null
+  if (data.reply_needed && data.reply_draft === null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['reply_draft'],
+      message: 'reply_draft must be provided when reply_needed is true (got null)',
+    });
   }
-);
+  // If reply_needed is false, reply_draft should be null
+  if (!data.reply_needed && data.reply_draft !== null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['reply_draft'],
+      message: 'reply_draft must be null when reply_needed is false (got non-null value)',
+    });
+  }
+});
 
 /**
  * Inferred TypeScript type for triage output

@@ -59,10 +59,12 @@ export async function healthRoutes(fastify: FastifyInstance) {
           latency_ms: dbLatency,
           ...(dbError && { error: dbError }),
         },
+        // TODO: Implement local_llm health check in future tasks (probe LOCAL_LLM_URL)
         local_llm: {
           status: 'unknown',
           message: 'Not probed during health check',
         },
+        // TODO: Implement groq_api health check in future tasks (validate GROQ_API_KEY)
         groq_api: {
           status: 'unknown',
           message: 'Not probed during health check',
