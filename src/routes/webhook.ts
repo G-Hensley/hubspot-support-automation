@@ -1,6 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { validateWebhookToken } from '../middleware/auth';
-import { HubSpotWebhookPayload, WebhookResponse } from '../types/index';
+import {
+  HubSpotWebhookPayload,
+  WebhookResponse,
+  hubspotWebhookPayloadSchema
+} from '../types/index';
 
 /**
  * Webhook routes
@@ -14,6 +18,9 @@ export async function webhookRoutes(fastify: FastifyInstance) {
     {
       // Apply webhook authentication middleware
       preHandler: validateWebhookToken,
+      schema: {
+        body: hubspotWebhookPayloadSchema,
+      },
     },
     async (request, reply) => {
       const { body } = request;

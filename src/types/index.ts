@@ -1,6 +1,37 @@
 import { z } from 'zod';
 
 /**
+ * Zod schema for HubSpot webhook payload validation
+ */
+export const hubspotWebhookPayloadSchema = z.object({
+  objectId: z.number(),
+  subscriptionType: z.string(),
+  portalId: z.number(),
+  occurredAt: z.number(),
+  properties: z.object({
+    hs_ticket_id: z.string().optional(),
+    subject: z.string(),
+    content: z.string(),
+    hs_pipeline_stage: z.string().optional(),
+    hs_ticket_priority: z.string().optional(),
+    source_type: z.string().optional(),
+  }),
+  associatedContacts: z.array(
+    z.object({
+      id: z.number(),
+      email: z.string().optional(),
+      firstname: z.string().optional(),
+      lastname: z.string().optional(),
+      company: z.string().optional(),
+    })
+  ).optional(),
+  customProperties: z.object({
+    customer_tier: z.string().optional(),
+    product_area: z.string().optional(),
+  }).optional(),
+});
+
+/**
  * Normalized internal ticket format used throughout the processing pipeline
  */
 export interface NormalizedTicket {

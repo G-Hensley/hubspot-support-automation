@@ -6,6 +6,8 @@ import { testDatabaseConnection, disconnectDatabase } from './db/index';
  * Application entry point
  */
 async function main() {
+  // Note: Using console.log/warn for pre-server startup logging
+  // since the Fastify logger is not yet initialized
   try {
     // Test database connection
     console.log('Testing database connection...');

@@ -23,6 +23,7 @@ const envSchema = z.object({
 
   // Local LLM configuration
   LOCAL_LLM_URL: z.string().url().default('http://localhost:11434'),
+  LOCAL_LLM_TOKEN: z.string().optional(),
   CF_ACCESS_CLIENT_ID: z.string().optional(),
   CF_ACCESS_CLIENT_SECRET: z.string().optional(),
 });
