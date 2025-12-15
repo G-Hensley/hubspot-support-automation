@@ -44,7 +44,7 @@ CREATE TABLE "processed_tickets" (
 DROP INDEX IF EXISTS "idx_provider";
 DROP INDEX IF EXISTS "idx_processed_at";
 DROP TABLE IF EXISTS "processed_tickets";
--- Note: processed_tickets_ticket_id_key is dropped automatically when table is dropped
+-- Note: Unique constraint index (processed_tickets_ticket_id_key) is dropped automatically when table is dropped
 ```
 
 **Testing Checklist**:

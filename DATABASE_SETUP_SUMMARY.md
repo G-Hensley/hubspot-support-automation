@@ -40,7 +40,7 @@ Created Prisma schema with:
 - Connection health check utilities
 
 #### idempotency.ts
-- `isTicketProcessed()`: Check if ticket already processed (< 50ms)
+- `isTicketProcessed()`: Check if ticket already processed (< 10ms)
 - `markTicketProcessed()`: Atomic record creation with race condition handling
 - `cleanupOldRecords()`: 7-day retention cleanup
 - `getProcessingStats()`: Monitoring and analytics
@@ -152,7 +152,7 @@ Created Prisma schema with:
 ### 5. Performance Targets Met
 | Operation | Target | Implementation |
 |-----------|--------|----------------|
-| Idempotency check | < 50ms | Unique index on ticketId |
+| Idempotency check | < 10ms | Unique index on ticketId |
 | Insert processed ticket | < 100ms | Single row insert with upsert |
 | Cleanup old records | < 500ms | Indexed DELETE with WHERE |
 | Health check | < 100ms | Simple SELECT 1 query |
