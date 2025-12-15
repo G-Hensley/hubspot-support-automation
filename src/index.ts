@@ -1,6 +1,7 @@
 import { config } from './config/index';
 import { createServer } from './server';
 import { testDatabaseConnection, disconnectDatabase } from './db/index';
+import { version } from '../package.json';
 
 /**
  * Application entry point
@@ -34,7 +35,7 @@ async function main() {
         port,
         host,
         node_env: config.NODE_ENV,
-        version: '1.0.0',
+        version,
       },
       'Server started successfully'
     );

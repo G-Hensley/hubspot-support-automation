@@ -54,32 +54,9 @@ export interface NormalizedTicket {
 
 /**
  * HubSpot webhook payload structure
+ * Derived from hubspotWebhookPayloadSchema to maintain single source of truth
  */
-export interface HubSpotWebhookPayload {
-  objectId: number;
-  subscriptionType: string;
-  portalId: number;
-  occurredAt: number;
-  properties: {
-    hs_ticket_id?: string;
-    subject: string;
-    content: string;
-    hs_pipeline_stage?: string;
-    hs_ticket_priority?: string;
-    source_type?: string;
-  };
-  associatedContacts?: Array<{
-    id: number;
-    email?: string;
-    firstname?: string;
-    lastname?: string;
-    company?: string;
-  }>;
-  customProperties?: {
-    customer_tier?: string;
-    product_area?: string;
-  };
-}
+export type HubSpotWebhookPayload = z.infer<typeof hubspotWebhookPayloadSchema>;
 
 /**
  * Webhook response format

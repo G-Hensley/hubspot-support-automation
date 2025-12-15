@@ -18,14 +18,26 @@ export async function webhookRoutes(fastify: FastifyInstance) {
     {
       // Apply webhook authentication middleware
       preHandler: validateWebhookToken,
-      schema: {
-        body: hubspotWebhookPayloadSchema,
-      },
+      // Manual validation performed in handler (Zod schemas not compatible with Fastify schema property)
     },
     async (request, reply) => {
-      const { body } = request;
+      // Manual Zod validation
+      const parseResult = hubspotWebhookPayloadSchema.safeParse(request.body);
+      if (!parseResult.success) {
+        return reply.code(400).send({
+          status: 'error',
+          message: 'Invalid request body',
+          errors: parseResult.error.errors,
+        });
+      }
+      const body = parseResult.data;
 
       // Extract ticket ID
+      // HubSpot webhooks may not always include hs_ticket_id in the properties object,
+      // especially for certain event types or if the ticket was just created and not fully populated.
+      // In such cases, objectId (the top-level unique identifier for the object in HubSpot) is used as a fallback.
+      // This ensures we always have a ticket identifier, but future maintainers should verify
+      // that objectId is always equivalent to the ticket's ID in all relevant webhook scenarios.
       const ticketId = body.properties.hs_ticket_id || String(body.objectId);
 
       request.log.info(

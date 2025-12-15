@@ -20,11 +20,12 @@ export async function validateWebhookToken(
       'Webhook authentication failed: missing X-Webhook-Token header'
     );
 
-    return reply.code(401).send({
+    reply.code(401).send({
       error: 'unauthorized',
       message: 'Missing or invalid X-Webhook-Token header',
       request_id: request.id,
     });
+    return;
   }
 
   const token = tokenHeader;
@@ -46,11 +47,12 @@ export async function validateWebhookToken(
       'Webhook authentication failed: invalid token'
     );
 
-    return reply.code(401).send({
+    reply.code(401).send({
       error: 'unauthorized',
       message: 'Missing or invalid X-Webhook-Token header',
       request_id: request.id,
     });
+    return;
   }
 
   // Token is valid, continue to route handler

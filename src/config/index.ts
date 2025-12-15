@@ -8,7 +8,7 @@ dotenv.config();
 const envSchema = z.object({
   // Runtime configuration
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().regex(/^\d+$/).transform(Number).default('3000'),
+  PORT: z.coerce.number().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 
   // Database configuration
@@ -23,6 +23,9 @@ const envSchema = z.object({
 
   // Local LLM configuration
   LOCAL_LLM_URL: z.string().url().default('http://localhost:11434'),
+  // Authentication for LOCAL_LLM_URL:
+  // - Use LOCAL_LLM_TOKEN for simple token-based authentication (e.g., if your local LLM endpoint expects an Authorization header).
+  // - Use CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET if your local LLM endpoint is protected by Cloudflare Access.
   LOCAL_LLM_TOKEN: z.string().optional(),
   CF_ACCESS_CLIENT_ID: z.string().optional(),
   CF_ACCESS_CLIENT_SECRET: z.string().optional(),

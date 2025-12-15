@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../db/index';
 import { HealthCheckResponse } from '../types/index';
+import { version } from '../../package.json';
 
 /**
  * Health check route
@@ -14,7 +15,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
     const uptime = process.uptime();
 
     // Check database connectivity
-    let dbStatus: 'healthy' | 'unhealthy' = 'healthy';
+    let dbStatus: 'healthy' | 'unhealthy' | 'unknown' = 'healthy';
     let dbLatency: number | null = null;
     let dbError: string | undefined;
 
@@ -22,7 +23,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
       const dbStartTime = Date.now();
 
       // Simple database query to check connectivity
-      await prisma.$queryRaw`SELECT 1`;
+      await prisma.$executeRaw`SELECT 1`;
 
       dbLatency = Date.now() - dbStartTime;
 
@@ -50,7 +51,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
     const response: HealthCheckResponse = {
       status,
       timestamp: new Date().toISOString(),
-      version: '1.0.0',
+      version,
       uptime_seconds: Math.floor(uptime),
       dependencies: {
         database: {
