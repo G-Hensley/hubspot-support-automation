@@ -15,11 +15,15 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
 
   // Authentication
-  HUBSPOT_WEBHOOK_TOKEN: z.string().min(1, 'HUBSPOT_WEBHOOK_TOKEN is required'),
+  HUBSPOT_WEBHOOK_TOKEN: z.string()
+    .min(32, 'HUBSPOT_WEBHOOK_TOKEN must be at least 32 characters long for security')
+    .regex(/^[A-Za-z0-9_\-\.]+$/, 'HUBSPOT_WEBHOOK_TOKEN should contain only alphanumeric characters, hyphens, underscores, and dots'),
 
   // External services
   DISCORD_WEBHOOK_URL: z.string().url(),
-  GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required'),
+  GROQ_API_KEY: z.string()
+    .min(1, 'GROQ_API_KEY is required')
+    .regex(/^gsk_/, 'GROQ_API_KEY must start with gsk_'),
 
   // Local LLM configuration
   LOCAL_LLM_URL: z.string().url().default('http://localhost:11434'),

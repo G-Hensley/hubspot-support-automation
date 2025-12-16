@@ -10,8 +10,8 @@ export const hubspotWebhookPayloadSchema = z.object({
   occurredAt: z.number(),
   properties: z.object({
     hs_ticket_id: z.string().optional(),
-    subject: z.string(),
-    content: z.string(),
+    subject: z.string().min(1, 'Subject is required and cannot be empty'),
+    content: z.string().min(1, 'Content is required and cannot be empty'),
     hs_pipeline_stage: z.string().optional(),
     hs_ticket_priority: z.string().optional(),
     source_type: z.string().optional(),
