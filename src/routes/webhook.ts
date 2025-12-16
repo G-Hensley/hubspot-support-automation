@@ -26,8 +26,7 @@ export async function webhookRoutes(fastify: FastifyInstance) {
       if (!parseResult.success) {
         return reply.code(400).send({
           error: 'validation_error',
-          message: 'Invalid request body',
-          details: parseResult.error.errors,
+          message: 'Invalid webhook payload',
           request_id: request.id,
         });
       }
@@ -35,8 +34,9 @@ export async function webhookRoutes(fastify: FastifyInstance) {
 
       /**
        * Extract ticket ID.
-       * Falls back to objectId if hs_ticket_id is missing (e.g., for certain event types or just-created tickets).
-       * Note: Verify objectId equivalence for all webhook scenarios before production use.
+       * If hs_ticket_id is missing (e.g., for certain event types or just-created tickets),
+       * fall back to objectId (the top-level unique identifier in HubSpot).
+       * See docs/webhook-payload-handling.md for details and caveats.
        */
       const ticketId = body.properties.hs_ticket_id || String(body.objectId);
 
