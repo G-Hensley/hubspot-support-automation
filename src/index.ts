@@ -2,6 +2,7 @@ import { config } from './config/index';
 import { createServer } from './server';
 import { testDatabaseConnection, disconnectDatabase } from './db/index';
 import { version } from '../package.json';
+import type { FastifyInstance } from 'fastify';
 
 /**
  * Application entry point
@@ -9,6 +10,8 @@ import { version } from '../package.json';
 async function main() {
   // Note: Using console.log/warn for pre-server startup logging
   // since the Fastify logger is not yet initialized
+  let server: FastifyInstance | null = null;
+
   try {
     // Test database connection
     console.log('Testing database connection...');
@@ -22,7 +25,68 @@ async function main() {
 
     // Create and configure Fastify server
     console.log('Creating Fastify server...');
-    const server = await createServer();
+    server = await createServer();
+
+    // Register process event handlers (registered here to avoid duplicate handlers if createServer called multiple times)
+    let isShuttingDown = false;
+    const shutdown = async (signal: NodeJS.Signals) => {
+      if (isShuttingDown) {
+        return;
+      }
+      isShuttingDown = true;
+      if (server) {
+        server.log.info(`Received ${signal}, starting graceful shutdown`);
+        try {
+          await server.close();
+          server.log.info('Server closed successfully');
+          process.exit(0);
+        } catch (error) {
+          server.log.error({ error }, 'Error during shutdown');
+          process.exit(1);
+        }
+      } else {
+        console.log(`Received ${signal}, exiting`);
+        process.exit(0);
+      }
+    };
+
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+    // Handle uncaught errors
+    process.on('uncaughtException', async (error) => {
+      if (server) {
+        server.log.fatal({ error }, 'Uncaught exception');
+        try {
+          await server.close();
+          server.log.info('Server closed successfully after uncaught exception');
+        } catch (shutdownError) {
+          server.log.error({ error: shutdownError }, 'Error during shutdown after uncaught exception');
+        }
+      } else {
+        console.error('Uncaught exception:', error);
+      }
+      // Ensure database connections are closed
+      await disconnectDatabase();
+      process.exit(1);
+    });
+
+    process.on('unhandledRejection', async (reason) => {
+      if (server) {
+        server.log.fatal({ reason }, 'Unhandled rejection');
+        try {
+          await server.close();
+          server.log.info('Server closed successfully after unhandled rejection');
+        } catch (shutdownError) {
+          server.log.error({ error: shutdownError }, 'Error during shutdown after unhandled rejection');
+        }
+      } else {
+        console.error('Unhandled rejection:', reason);
+      }
+      // Ensure database connections are closed
+      await disconnectDatabase();
+      process.exit(1);
+    });
 
     // Start listening on configured port
     const port = config.PORT;

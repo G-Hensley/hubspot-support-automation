@@ -3,7 +3,6 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { config } from './config/index';
 import { registerRoutes } from './routes/index';
-import { disconnectDatabase } from './db/index';
 
 /**
  * Create and configure Fastify server instance
@@ -86,53 +85,6 @@ export async function createServer() {
 
   // Register all routes
   await registerRoutes(fastify);
-
-  // Graceful shutdown handler
-  let isShuttingDown = false;
-  const shutdown = async (signal: NodeJS.Signals) => {
-    if (isShuttingDown) {
-      return;
-    }
-    isShuttingDown = true;
-    fastify.log.info(`Received ${signal}, starting graceful shutdown`);
-    try {
-      await fastify.close();
-      fastify.log.info('Server closed successfully');
-      process.exit(0);
-    } catch (error) {
-      fastify.log.error({ error }, 'Error during shutdown');
-      process.exit(1);
-    }
-  };
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-
-  // Handle uncaught errors
-  process.on('uncaughtException', async (error) => {
-    fastify.log.fatal({ error }, 'Uncaught exception');
-    try {
-      await fastify.close();
-      fastify.log.info('Server closed successfully after uncaught exception');
-    } catch (shutdownError) {
-      fastify.log.error({ error: shutdownError }, 'Error during shutdown after uncaught exception');
-    }
-    // Ensure database connections are closed
-    await disconnectDatabase();
-    process.exit(1);
-  });
-
-  process.on('unhandledRejection', async (reason) => {
-    fastify.log.fatal({ reason }, 'Unhandled rejection');
-    try {
-      await fastify.close();
-      fastify.log.info('Server closed successfully after unhandled rejection');
-    } catch (shutdownError) {
-      fastify.log.error({ error: shutdownError }, 'Error during shutdown after unhandled rejection');
-    }
-    // Ensure database connections are closed
-    await disconnectDatabase();
-    process.exit(1);
-  });
 
   return fastify;
 }
