@@ -39,13 +39,16 @@ async function main() {
         try {
           await server.close();
           server.log.info('Server closed successfully');
+          await disconnectDatabase();
           process.exit(0);
         } catch (error) {
           server.log.error({ error }, 'Error during shutdown');
+          await disconnectDatabase();
           process.exit(1);
         }
       } else {
         console.log(`Received ${signal}, exiting`);
+        await disconnectDatabase();
         process.exit(0);
       }
     };
