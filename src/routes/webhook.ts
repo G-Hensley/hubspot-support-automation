@@ -33,10 +33,8 @@ export async function webhookRoutes(fastify: FastifyInstance) {
       const body = parseResult.data;
 
       /**
-       * Extract ticket ID.
-       * If hs_ticket_id is missing (e.g., for certain event types or just-created tickets),
-       * fall back to objectId (the top-level unique identifier in HubSpot).
-       * See docs/webhook-payload-handling.md for details and caveats.
+       * Extract ticket ID. Falls back to objectId if hs_ticket_id is missing
+       * (can occur for certain event types or newly-created tickets before property sync).
        */
       const ticketId = body.properties.hs_ticket_id || String(body.objectId);
 

@@ -129,6 +129,8 @@ export const triageOutputSchema = z.object({
     'None'
   ]),
   asana_ticket_type_if_needed: z.enum(['Bug', 'Feedback', 'Escalation', 'None']),
+  // Customer-facing summary (max 300 chars for Discord embed field limits)
+  // If LLM exceeds this, validation will fail and retry with explicit length constraint
   customer_summary: z.string().max(300),
   reply_needed: z.boolean(),
   reply_draft: z.string().nullable(),
@@ -136,7 +138,7 @@ export const triageOutputSchema = z.object({
   internal_notes: z.array(z.string()).default([]),
   confidence: z.number().min(0).max(1),
 }).superRefine((data, ctx) => {
-  // If reply_needed is true, reply_draft should not be null
+  // Validate reply_draft consistency with reply_needed
   if (data.reply_needed && data.reply_draft === null) {
     ctx.addIssue({
       code: 'custom',
@@ -144,13 +146,31 @@ export const triageOutputSchema = z.object({
       message: 'reply_draft must be provided when reply_needed is true (got null)',
     });
   }
-  // If reply_needed is false, reply_draft should be null
   if (!data.reply_needed && data.reply_draft !== null) {
     ctx.addIssue({
       code: 'custom',
       path: ['reply_draft'],
       message: 'reply_draft must be null when reply_needed is false (got non-null value)',
     });
+  }
+
+  // For 'request_more_info' handling mode, validate questions are provided
+  // and reply_needed should typically be true (questions sent to customer)
+  if (data.handling_mode === 'request_more_info') {
+    if (data.questions_for_customer.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['questions_for_customer'],
+        message: 'questions_for_customer must not be empty when handling_mode is request_more_info',
+      });
+    }
+    if (!data.reply_needed) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['reply_needed'],
+        message: 'reply_needed should be true when handling_mode is request_more_info (questions should be sent to customer)',
+      });
+    }
   }
 });
 
